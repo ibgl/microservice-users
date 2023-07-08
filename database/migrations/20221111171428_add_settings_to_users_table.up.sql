@@ -1,0 +1,1 @@
+ALTER TABLE public.users ADD settings json NULL;

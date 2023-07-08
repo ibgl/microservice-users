@@ -1,0 +1,1 @@
+ALTER TABLE public.refresh_tokens ADD ip varchar NULL;

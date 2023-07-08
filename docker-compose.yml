@@ -1,0 +1,53 @@
+version: '3.1'
+
+services:
+  users-app:
+    build:
+      context: docker/app
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    restart: unless-stopped
+    tty: true
+    working_dir: /app
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    depends_on:
+      - users-postgres
+    networks:
+      - users-net
+
+  users-postgres:
+    image: postgres:14.3
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 45432:5432
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - .:/app
+      - dbdata:/var/lib/postgresql/data
+    networks:
+      - users-net 
+      
+  migrate:
+      image: migrate/migrate
+      networks:
+          - users-net
+      volumes:
+          - ./database/migrations:/migrations
+      environment:
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      
+volumes:
+  dbdata:
+
+networks:
+  users-net:
+    driver: bridge
